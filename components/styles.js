@@ -4,11 +4,10 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F8FAFC',
-    // Removido paddingHorizontal para permitir que o Header encoste nas bordas da tela
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   
-  // Header com destaque ocupando toda a largura
+ 
   headerContainer: {
     backgroundColor: '#1E293B',
     paddingHorizontal: 20,
@@ -34,7 +33,7 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  // Stats / Dashboard rápido
+ 
   statsRow: {
     flexDirection: 'row',
     gap: 12,
@@ -63,13 +62,13 @@ export const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  // Card do Formulário
+ 
   formCard: {
     backgroundColor: '#FFFFFF',
     padding: 18,
     borderRadius: 16,
     marginBottom: 20,
-    marginHorizontal: 20, // Usa marginHorizontal em vez de paddingHorizontal para o card
+    marginHorizontal: 20, 
     borderWidth: 1,
     borderColor: '#062247',
     boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.05)',
@@ -139,7 +138,7 @@ export const styles = StyleSheet.create({
     fontSize: 14,
   },
 
-  // Campo de Busca
+ 
   searchContainer: {
     marginBottom: 20,
     paddingHorizontal: 20,
@@ -156,7 +155,7 @@ export const styles = StyleSheet.create({
     color: '#0F172A',
   },
 
-  // Lista e Cards dos Usuários
+ 
   userCard: {
     flexDirection: 'row',
     backgroundColor: '#FFFFFF',
@@ -235,7 +234,7 @@ export const styles = StyleSheet.create({
     fontSize: 18,
   },
 
-  // Estilos do Modal
+ 
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(15, 23, 42, 0.6)',
