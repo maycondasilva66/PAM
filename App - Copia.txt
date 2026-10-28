@@ -1,0 +1,667 @@
+{/* npx expo install react-native-safe-area-context */}
+
+import * as React from 'react';
+import { useState, useEffect  } from 'react';
+import {Text, TextInput, View, FlatList, TouchableOpacity, Image, Alert,ScrollView, Linking,useWindowDimensions  } from 'react-native';
+import {
+  createStaticNavigation,
+  useNavigation,
+  useRoute, 
+} from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import Modal from 'react-native-modal';
+import { Picker } from '@react-native-picker/picker';
+import Checkbox from 'expo-checkbox';
+import { DATADEVS_2 } from './dataDesenvolvedores_2';
+import { COMIDA } from './comidas';
+
+//Import css
+import { homeStyles } from './components/homeStyles';
+import { loginStyles } from './components/loginStyles';
+import { desenvolvedorStyles } from './components/desenvolvedorStyles'
+import { finalizarStyles } from './components/finalizarStyles'
+import { comidaStyles } from './components/comidaStyles'
+import { perfilStyles } from './components/perfilStyles'; 
+
+
+
+// -------------------------------------------------------------------------
+// Desenvolvedores
+const ItemDevs_2 = ({ nomeDev, idadeDev, fotoDev }) => {
+  return (
+    <View style={desenvolvedorStyles.itemDevs_2}>
+      <View style={desenvolvedorStyles.containerImgDev_2}>
+        <Image style={desenvolvedorStyles.imgDev_2} source={fotoDev} />
+      </View>
+      <Text style={desenvolvedorStyles.nomeDev_2}>{nomeDev}</Text>
+      <Text style={desenvolvedorStyles.idadeDev_2}>{idadeDev}</Text>
+    </View>
+  );
+};
+
+function DesenvolvedoresScreen() {
+  return (
+    <View style={desenvolvedorStyles.containerPrincipalDesenvolvedores_2}>
+      <FlatList
+        data={DATADEVS_2}
+        renderItem={({ item }) => (
+          <ItemDevs_2
+            nomeDev={item.nomeDev}
+            idadeDev={item.idadeDev}
+            fotoDev={item.fotoDev}
+          />
+        )}
+        showsVerticalScrollIndicator={false}
+        keyExtractor={(item) => item.id.toString()}
+        style={desenvolvedorStyles.conteudoListasDevs_2}
+      />
+    </View>
+  );
+}
+
+// -------------------------------------------------------------------------
+// Perfil
+function perfilScreen({ route }) {
+  const { imagemUsuario } = route.params || {};
+  const [pagamentoSelecionado, setPagamentoSelecionado] = useState('Pix');
+  const [modalVisivel, setModalVisivel] = useState(false);
+
+  const pagamentoEfetuado = () => {
+    setModalVisivel(true);
+  };
+
+  return (
+    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+      <View style={perfilStyles.viewDeCima}>
+        <Text style={perfilStyles.tituloCima}>Bem-vindo ao seu perfil!</Text>
+
+        {imagemUsuario ? (
+          <Image
+            source={typeof imagemUsuario === 'string' ? { uri: imagemUsuario } : imagemUsuario}
+            style={perfilStyles.imgPerfil}
+          />
+        ) : (
+          <Text>Nenhuma imagem de perfil definida</Text>
+        )}
+      </View>
+
+      <View style={perfilStyles.containerPerfil}>
+        <Text style={perfilStyles.textoPrincipal}>Perfil do Usuário</Text>
+
+        <View style={perfilStyles.containerQuadradoEmVolta}>
+          <Text style={perfilStyles.textoFormasPagamento}>Formas de Pagamento</Text>
+
+          <View style={perfilStyles.containerOpcoes}>
+            <View style={perfilStyles.containerCheckboxRow}>
+              <Checkbox
+                value={pagamentoSelecionado === 'Pix'}
+                onValueChange={() => setPagamentoSelecionado('Pix')}
+                color={pagamentoSelecionado === 'Pix' ? '#b44f0c' : undefined}
+              />
+              <Text style={perfilStyles.textoCheckboxPix}>Pix</Text>
+            </View>
+
+            <View style={perfilStyles.containerCheckboxRow}>
+              <Checkbox
+                value={pagamentoSelecionado === 'Crédito'}
+                onValueChange={() => setPagamentoSelecionado('Crédito')}
+                color={pagamentoSelecionado === 'Crédito' ? '#b44f0c' : undefined}
+              />
+              <Text style={perfilStyles.textoCheckboxPix}>Crédito</Text>
+            </View>
+
+            <View style={perfilStyles.containerCheckboxRow}>
+              <Checkbox
+                value={pagamentoSelecionado === 'Débito'}
+                onValueChange={() => setPagamentoSelecionado('Débito')}
+                color={pagamentoSelecionado === 'Débito' ? '#b44f0c' : undefined}
+              />
+              <Text style={perfilStyles.textoCheckboxPix}>Débito</Text>
+            </View>
+          </View>
+
+          <Text style={perfilStyles.textoOpcaoSelecionada}>
+            {pagamentoSelecionado ? `Opção selecionada: ${pagamentoSelecionado}` : 'Nenhuma opção selecionada'}
+          </Text>
+
+          <TouchableOpacity
+            style={perfilStyles.botaoPagar}
+            onPress={pagamentoEfetuado}
+            activeOpacity={0.7}
+          >
+            <Text style={perfilStyles.textoBotaoPagar}>Confirmar</Text>
+          </TouchableOpacity>
+        </View>
+
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisivel}
+          onRequestClose={() => setModalVisivel(false)}
+        >
+          <View style={perfilStyles.containerModal}>
+            <View style={perfilStyles.containerAlert}>
+              <Text style={perfilStyles.modalTitulo}>Alteração feita com sucesso</Text>
+              <Text style={perfilStyles.modalMensagemOpcaoEscolhida}>
+                Forma de Pagamento: {pagamentoSelecionado}
+              </Text>
+              <TouchableOpacity
+                style={perfilStyles.modalBotao}
+                onPress={() => setModalVisivel(false)}
+              >
+                <Text style={perfilStyles.modalBotaoTexto}>Entendido</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      </View>
+    </ScrollView>
+  );
+}
+
+// -------------------------------------------------------------------------
+// Login
+function LoginScreen() {
+  const navigation = useNavigation();
+  const [isCheckbox, setCheckbox] = useState(true);
+  const [usuario, setUsuario] = useState('admin');
+  const [senha, setSenha] = useState('admin');
+
+  const gerenciarCheckbox = (marcado) => {
+    setCheckbox(marcado);
+    if (!marcado) {
+      setUsuario('');
+      setSenha('');
+    } else {
+      setUsuario('admin');
+      setSenha('admin');
+    }
+  };
+
+  const verificarUsuarioESenha = () => {
+    if (usuario === 'admin' && senha === 'admin') {
+      const imagemAdmin = require('./components/images/icones/gustavo.jpeg');
+      navigation.navigate('Home', {imagemUsuario: imagemAdmin});
+
+
+    } else if (usuario === 'Arthur' && senha === 'Morgan') {
+      const imagemArthur = require('./components/images/ArthurMorgan.jpeg');
+      navigation.navigate ('Home',{imagemUsuario: imagemArthur});
+
+
+    } else if (usuario === 'Maycolas' && senha === 'Morgan') {
+      const imagemMaycon = require('./components/images/Maycon_v2.jpeg');
+      navigation.navigate ('Home',{imagemUsuario: imagemMaycon});
+    }
+
+     else if (usuario === 'John' && senha === 'Amongus') {
+      const imagemJohn = require('./components/images/John_v2.jpeg');
+      navigation.navigate ('Home',{imagemUsuario: imagemJohn});
+    } 
+
+     else if (usuario === 'Gustavo' && senha === 'Morgan') {
+      const imagemGustavo = require('./components/images/Gustavo.jpeg');
+      navigation.navigate ('Home',{imagemUsuario: imagemGustavo});
+    } 
+
+    else{
+     Alert.alert('Usuário ou senha incorretos!');
+    }
+  };
+  
+  return (
+    <View style={loginStyles.containerLogin}>
+      <View style={loginStyles.containerLogo}>
+        <Image 
+          source={require('./components/images/logoApp.png')} 
+          style={loginStyles.logo} 
+        />
+      </View>
+
+      <Text style={loginStyles.textoAbaixoLogo}>
+        Bem-vindo ao iComida
+      </Text>
+
+      <Text style={loginStyles.textoPrincipalScreenLogin}>Login</Text>
+      <View style={loginStyles.containerTextInputLogin}>
+  
+        <TextInput 
+          placeholder="Usuário" 
+          value={usuario}
+          onChangeText={setUsuario}
+          style={loginStyles.caixaTextoLogin}
+        />
+        
+        <TextInput 
+          placeholder="Senha" 
+          value={senha}
+          onChangeText={setSenha}
+          secureTextEntry={true} 
+          style={loginStyles.caixaTextoLogin}
+        />
+
+       <View style={loginStyles.containerCheckboxRow}>
+          <Checkbox
+            value={isCheckbox}
+            onValueChange={gerenciarCheckbox} 
+            color={isCheckbox ? '#b44f0c' : undefined}
+          />
+          <Text style={loginStyles.textoCheckbox}>
+            Lembrar meus dados de acesso
+          </Text>
+        </View> 
+
+        <TouchableOpacity style={loginStyles.botaoEntrarLogin} onPress={verificarUsuarioESenha}>
+          <Text style={loginStyles.textoBotaoEntrarLogin}>Entrar</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
+
+// -------------------------------------------------------------------------
+// Comida
+const ItemComida = ({ nomeComida, preco, fotoComida, descricao }) => {
+  const navigation = useNavigation();
+  const comprarComida = () => {
+    navigation.navigate('FinalizarPedido', { nomeComida, preco, fotoComida, descricao });
+  };
+
+  return (
+    <View style={comidaStyles.blocoComida}>
+      <Image source={fotoComida} style={comidaStyles.imagemComida} />
+      <Text style={comidaStyles.nomeComida}>{nomeComida}</Text>
+      <Text style={comidaStyles.precoComida}>{preco}</Text>
+      <TouchableOpacity style={comidaStyles.botaoComprar} onPress={comprarComida}>
+        <Text style={comidaStyles.textoBotaoComprar}>Comprar</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+function ComidasScreen() {
+  const [categoriaSelecionada, setCategoriaSelecionada] = useState('TodasComidas');
+
+  const categorias = [
+    'TodasComidas',
+    ...Array.from(new Set(COMIDA.flatMap((item) => item.categoria))),
+  ];
+
+  const comidasFiltradas = categoriaSelecionada === 'TodasComidas'
+    ? COMIDA
+    : COMIDA.filter((item) => item.categoria.includes(categoriaSelecionada));
+
+  return (
+    <View style={comidaStyles.containerPrincipalComida}>
+      <View style={comidaStyles.containerFiltroComida}>
+        <Text style={comidaStyles.textoPrincipalComida}>Filtrar por Categoria</Text>
+
+        <Picker
+          selectedValue={categoriaSelecionada}
+          onValueChange={(itemValue) => setCategoriaSelecionada(itemValue)}
+          style={comidaStyles.pickerComida}
+        >
+          {categorias.map((cat) => (
+            <Picker.Item
+              key={cat}
+              label={cat === 'TodasComidas' ? 'Todas' : cat}
+              value={cat}
+            />
+          ))}
+        </Picker>
+      </View>
+
+      <FlatList
+        data={comidasFiltradas}
+        keyExtractor={(item) => item.id.toString()}
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item }) => (
+          <ItemComida
+            nomeComida={item.nomeComida}
+            preco={item.preco}
+            fotoComida={item.fotoComida}
+            descricao={item.descricao}
+          />
+        )}
+        contentContainerStyle={comidaStyles.flatListContent}
+        style={comidaStyles.flatListStyle}
+      />
+    </View>
+  );
+}
+
+
+
+//-------------------------------------------------------------------------
+//Home
+function HomeScreen({ route }) {
+  const navigation = useNavigation();
+  const { width: screenWidth } = useWindowDimensions(); 
+  
+  const { imagemUsuario } = route.params || {};
+  const cardWidth = screenWidth * 0.80; 
+
+  const comidasPromocao = COMIDA.slice(0, 3);
+
+  const ItemComidaHome = ({ nomeComida, preco, fotoComida, descricao }) => {
+    const comprarComida = () => {
+      navigation.navigate('FinalizarPedido', { nomeComida, preco, fotoComida, descricao });
+    };
+
+    return (
+      <View style={[homeStyles.blocoComida, { width: cardWidth }]}>
+        <Image source={fotoComida} style={homeStyles.imagemComida} />
+        <Text style={homeStyles.nomeComida}>{nomeComida}</Text>
+        <Text style={homeStyles.precoComida}>{preco}</Text>
+        <TouchableOpacity style={homeStyles.botaoComprar} onPress={comprarComida}>
+          <Text style={homeStyles.textoBotaoComprar}>Comprar</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  return (
+    <View style={homeStyles.containerHome}>
+      <View style={homeStyles.containerLogo}>
+        <Image 
+          source={require('./components/images/logoApp.png')} 
+          style={homeStyles.logo} 
+        />
+      </View>
+
+      <View>
+         <TouchableOpacity 
+          style={homeStyles.containerPerfil} 
+          onPress={() => navigation.navigate('TelaPerfil', { imagemUsuario: imagemUsuario })}
+        >
+          <Image source={imagemUsuario} style={homeStyles.perfil} fadeDuration={0} />
+        </TouchableOpacity>
+      </View>
+
+      <View style={homeStyles.containerInput}>
+         <TextInput 
+            placeholder="O que você deseja comer hoje?" 
+            style={homeStyles.caixaTextoHome}
+        />
+      </View>
+
+      <Text style={homeStyles.txtPromocao}>
+        PROMOÇÕES DA SEMANA!
+      </Text>
+
+      <View style={homeStyles.containerCarrossel}> 
+        <FlatList
+          data={comidasPromocao}
+          keyExtractor={(item) => item.id.toString()}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <ItemComidaHome
+              nomeComida={item.nomeComida}
+              preco={item.preco}
+              fotoComida={item.fotoComida}
+              descricao={item.descricao}
+            />
+          )}
+          contentContainerStyle={homeStyles.flatListContent}
+          style={homeStyles.flatListStyle}
+        />
+      </View>
+
+      <View style={homeStyles.containerBotoes}>
+        {/* CORRIGIDO: Adicionado </TouchableOpacity> que faltava aqui */}
+        <TouchableOpacity 
+          style={homeStyles.botaoEntrarHome} 
+          onPress={() => navigation.navigate('Comidas')}
+        >
+          <Text style={homeStyles.textoBotaoEntrarHome}>Ver mais comidas</Text>
+        </TouchableOpacity>
+
+        {/* CORRIGIDO: Adicionado </TouchableOpacity> que faltava aqui */}
+        <TouchableOpacity 
+          style={homeStyles.botaoEntrarDevs} 
+          onPress={() => navigation.navigate('Desenvolvedores_2')}
+        >
+          <Text style={homeStyles.textoBotaoEntrarDevs}>Desenvolvedores</Text>
+        </TouchableOpacity>
+
+
+      </View>
+    </View>
+  );
+}
+
+// -------------------------------------------------------------------------
+//FinalizarPedido
+function FinalizarPedidoScreen() {
+  const route = useRoute();
+  const [modalVisivel1, setModalVisivel1] = useState(false);
+  const { nomeComida, preco, fotoComida, descricao } = route.params || {};
+  const finalizarCompra = () => {
+    setModalVisivel1(true);
+    // alert(`Compra finalizada: ${nomeComida} por ${preco}`);
+  };
+
+  const abrirWhatsApp = async () => {
+    const numero = '5511949788282';
+    const mensagem = 'Olá! Gostaria de mais informações.';
+    
+    const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`;  
+    try {
+      const supported = await Linking.canOpenURL(url); //
+      if (supported) {
+          await Linking.openURL(url); //
+      } else {
+          console.log("Não foi possível abrir o link: " + url);
+      }
+    } catch (error) {
+      console.error("Erro ao tentar abrir o WhatsApp:", error); //
+    }  
+  }
+  
+  return (
+    <View 
+      style={{ 
+        flex: 1, 
+        backgroundColor: '#f5e6d3', 
+        width: '100%',
+        overflowY: 'auto', 
+        maxHeight: '100vh' 
+      }}
+    >
+      <View style={{ width: '100%', alignItems: 'center', paddingBottom: 60 }}>
+        <View style={finalizarStyles.containerFinalizar}>
+          <Text style={finalizarStyles.tituloPrincipalFinalizar}>Finalizar Pedido</Text>
+        </View>
+
+        <View style={finalizarStyles.containerPrincipalFinalizar}>
+          {fotoComida && (
+            <Image source={fotoComida} style={finalizarStyles.imagemComidaFinalizar} />
+          )}
+          <Text style={finalizarStyles.nomeComidaFinalizar}>{nomeComida}</Text>
+          <Text style={finalizarStyles.precoComidaFinalizar}>{preco}</Text>
+          <Text style={finalizarStyles.descComidaFinalizar}>{descricao}</Text>
+        </View>
+
+        <TouchableOpacity style={finalizarStyles.botaoComprarFinalizar} onPress={finalizarCompra}>
+          <Text style={finalizarStyles.textoBotaoComprarFinalizar}>Finalizar compra</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={finalizarStyles.botaoWhatsApp} onPress={abrirWhatsApp}>
+          <Text style={finalizarStyles.textoBotaoWhatsApp}>Pedir pelo WhatsApp</Text>
+        </TouchableOpacity>
+      </View>
+          <Modal
+            isVisible={modalVisivel1}                  // 1. Corrigido de 'visible' para 'isVisible'
+            onBackdropPress={() => setModalVisivel1(false)} // Fecha se clicar fora do modal
+            onBackButtonPress={() => setModalVisivel1(false)} // 2. Substitui o 'onRequestClose' (Android)
+            animationIn="flipInY"                      // Gira para entrar (Eixo Y - lateral)
+            animationOut="flipOutY"                    // Gira para sair
+            animationInTiming={400}                    // Duração da entrada (em ms)
+            animationOutTiming={400}                   // Duração da saída
+          >
+        <View style={perfilStyles.containerModal}>
+          <View style={perfilStyles.containerAlert}>
+            <Text style={perfilStyles.modalTitulo}>Compra finalizada: {nomeComida} por {preco}</Text>
+            {/* <Text style={perguntaStyles.modalMensagemOpcaoEscolhida}>Forma de Pagamento: {pagamentoSelecionado}</Text> */}
+            <TouchableOpacity 
+              style={perfilStyles.modalBotao} 
+              onPress={() => setModalVisivel1(false)}
+            >
+              <Text style={perfilStyles.modalBotaoTexto}>Entendido</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    </View>
+  );
+}
+
+
+const MyStack = createStackNavigator({
+  screens: {
+    Login: LoginScreen,
+    Home: HomeScreen,
+    Desenvolvedores_2: DesenvolvedoresScreen,
+    Comidas: ComidasScreen,
+    FinalizarPedido: FinalizarPedidoScreen,
+    TelaPerfil:perfilScreen,
+    // TelaPergunta:PerguntaScreen,
+
+   Comidas: {
+      screen: ComidasScreen,
+      options: {
+        header: ({ navigation }) => (
+          <View style={comidaStyles.headerCustom}>
+            <TouchableOpacity 
+              onPress={() => navigation.goBack()} 
+              style={comidaStyles.botaoVoltar}
+            >
+              <Text style={comidaStyles.textoBotaoVoltar}>
+                ←
+              </Text>
+            </TouchableOpacity>
+            <Text style={comidaStyles.tituloHeader}>iComida</Text>
+          </View>
+        ),
+      },
+    },
+
+    Home: {
+      screen: HomeScreen,
+      options: {
+        header: ({ navigation }) => (
+          <View style={comidaStyles.headerCustom}>
+            <TouchableOpacity 
+              onPress={() => navigation.goBack()} 
+              style={comidaStyles.botaoVoltar}
+            >
+              <Text style={comidaStyles.textoBotaoVoltar}>
+                ←
+              </Text>
+            </TouchableOpacity>
+            <Text style={comidaStyles.tituloHeader}>iComida</Text>
+          </View>
+        ),
+      },
+    },
+
+    Desenvolvedores_2: {
+      screen: DesenvolvedoresScreen,
+      options: {
+        header: ({ navigation }) => (
+          <View style={comidaStyles.headerCustom}>
+            <TouchableOpacity 
+              onPress={() => navigation.goBack()} 
+              style={comidaStyles.botaoVoltar}
+            >
+              <Text style={comidaStyles.textoBotaoVoltar}>
+                ←
+              </Text>
+            </TouchableOpacity>
+            <Text style={comidaStyles.tituloHeader}>Desenvolvedores</Text>
+          </View>
+        ),
+      },
+    },
+
+    Login: {
+      screen: LoginScreen,
+      options: {
+        header: ({ navigation }) => (
+          <View style={comidaStyles.headerCustom}>
+            <TouchableOpacity 
+              onPress={() => navigation.goBack()} 
+              style={comidaStyles.botaoVoltar}
+            >
+              <Text style={comidaStyles.textoBotaoVoltar}>
+                ←
+              </Text>
+            </TouchableOpacity>
+            <Text style={comidaStyles.tituloHeader}>iComida</Text>
+          </View>
+        ),
+      },
+    },
+
+    // 5. Finalizar Pedido
+    FinalizarPedido: {
+      screen: FinalizarPedidoScreen,
+      options: {
+        header: ({ navigation }) => (
+          <View style={comidaStyles.headerCustom}>
+            <TouchableOpacity 
+              onPress={() => navigation.goBack()} 
+              style={comidaStyles.botaoVoltar}
+            >
+              <Text style={comidaStyles.textoBotaoVoltar}>←</Text>
+            </TouchableOpacity>
+            <Text style={comidaStyles.tituloHeader}>iComida</Text>
+          </View>
+        ),
+      },
+    },
+
+
+    TelaPerfil: {
+      screen: perfilScreen,
+      options: {
+        header: ({ navigation }) => (
+          <View style={comidaStyles.headerCustom}>
+            <TouchableOpacity 
+              onPress={() => navigation.goBack()} 
+              style={comidaStyles.botaoVoltar}
+            >
+              <Text style={comidaStyles.textoBotaoVoltar}>←</Text>
+            </TouchableOpacity>
+            <Text style={comidaStyles.tituloHeader}>iComida</Text>
+          </View>
+        ),
+      },
+    },
+
+    // TelaPergunta: {
+    //   screen: PerguntaScreen,
+    //   options: {
+    //     header: ({ navigation }) => (
+    //       <View style={comidaStyles.headerCustom}>
+    //         <TouchableOpacity 
+    //           onPress={() => navigation.goBack()} 
+    //           style={comidaStyles.botaoVoltar}
+    //         >
+    //           <Text style={comidaStyles.textoBotaoVoltar}>←</Text>
+    //         </TouchableOpacity>
+    //         <Text style={comidaStyles.tituloHeader}>iComida</Text>
+    //       </View>
+    //     ),
+    //   },
+    // },
+  }, 
+});
+
+
+const Navigation = createStaticNavigation(MyStack);
+export default function App() {
+  return <Navigation />;
+}

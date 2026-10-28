@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "iComida",
+    "slug": "iComida",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./components/images/icones/icomida_logo_dark_purple_2c883c78.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./components/images/icones/icomida_logo_dark_purple_2c883c78.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#9D00FF"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.perajulcasteam.iComida",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./components/images/icones/icomida_logo_dark_purple_2c883c78.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.perajulcasteam.iComida"
+    },
+    "web": {
+      "favicon": "./components/images/icones/icomida_logo_dark_purple_2c883c78.png"
+    },
+    "plugins": [
+      "expo-sqlite"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "3059cc44-1d14-4de7-a2cf-72aaa24cd052"
+      }
+    },
+    "owner": "maycon.silvaetec66"
+  }
+}
